@@ -1,0 +1,39 @@
+import cv2
+import matplotlib.pyplot as plt
+
+# ---------- Load Image ----------
+image = cv2.imread("image.jpg", 0)   # load in grayscale
+
+if image is None:
+    raise ValueError("Image not found. Place 'image.jpg' in the same folder.")
+
+# ---------- Apply Otsu's Thresholding ----------
+# THRESH_BINARY + THRESH_OTSU lets Otsu choose the threshold automatically
+ret, otsu_img = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+print("Otsu's Selected Threshold Value:", ret)
+
+# ---------- Plotting ----------
+plt.figure(figsize=(12,4))
+
+# Original image
+plt.subplot(1,3,1)
+plt.title("Original Image")
+plt.imshow(image, cmap="gray")
+plt.axis("off")
+
+# Histogram
+plt.subplot(1,3,2)
+plt.title("Histogram of Image")
+plt.hist(image.ravel(), 256)
+plt.xlabel("Intensity Values")
+plt.ylabel("Frequency")
+
+# Otsu Threshold Output
+plt.subplot(1,3,3)
+plt.title("Otsu Thresholding Result")
+plt.imshow(otsu_img, cmap="gray")
+plt.axis("off")
+
+plt.tight_layout()
+plt.show()
