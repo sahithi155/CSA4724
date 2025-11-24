@@ -1,0 +1,48 @@
+# knn_evaluation.py
+# K-Nearest Neighbors evaluation on Breast Cancer and Iris
+# Run in Colab/Jupyter. Requires: scikit-learn, numpy, pandas
+
+import numpy as np
+from sklearn import datasets
+from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, roc_auc_score
+import warnings
+warnings.filterwarnings('ignore')
+np.random.seed(42)
+
+def eval_knn(X, y, name="dataset", n_neighbors=5):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25,
+                                                        random_state=42, stratify=y)
+    scaler = StandardScaler().fit(X_train)
+    X_train_s = scaler.transform(X_train)
+    X_test_s = scaler.transform(X_test)
+
+    clf = KNeighborsClassifier(n_neighbors=n_neighbors)
+    clf.fit(X_train_s, y_train)
+    y_pred = clf.predict(X_test_s)
+
+    acc = accuracy_score(y_test, y_pred)
+    cm = confusion_matrix(y_test, y_pred)
+    report = classification_report(y_test, y_pred, zero_division=0)
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    cv_scores = cross_val_score(clf, np.vstack([X_train_s, X_test_s]), np.hstack([y_train, y_test]),
+                                cv=skf, scoring='accuracy')
+
+    print(f"\n=== KNN on {name} (k={n_neighbors}) ===")
+    print("Test accuracy:", acc)
+    print("5-fold CV mean/std:", cv_scores.mean(), cv_scores.std())
+    print("Confusion matrix:\n", cm)
+    print("Classification report:\n", report)
+    if len(np.unique(y)) == 2 and hasattr(clf, "predict_proba"):
+        print("ROC AUC:", roc_auc_score(y_test, clf.predict_proba(X_test_s)[:,1]))
+
+
+# Load datasets
+bc = datasets.load_breast_cancer()
+iris = datasets.load_iris()
+
+# Evaluate
+eval_knn(bc.data, bc.target, name="Breast Cancer", n_neighbors=5)
+eval_knn(iris.data, iris.target, name="Iris", n_neighbors=5)
