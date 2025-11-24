@@ -1,0 +1,42 @@
+# random_forest_evaluation.py
+# Run: paste into one cell and run.
+import numpy as np
+from sklearn import datasets
+from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, roc_auc_score
+import warnings
+warnings.filterwarnings('ignore')
+np.random.seed(42)
+
+def evaluate_rf(X, y, scale=False, name="dataset"):
+    # Note: RandomForest doesn't need scaling, so default scale=False
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25,
+                                                        random_state=42, stratify=y)
+    X_train_s, X_test_s = X_train, X_test
+
+    clf = RandomForestClassifier(n_estimators=100, random_state=42).fit(X_train_s, y_train)
+    y_pred = clf.predict(X_test_s)
+    acc = accuracy_score(y_test, y_pred)
+    cm = confusion_matrix(y_test, y_pred)
+    report = classification_report(y_test, y_pred, zero_division=0)
+
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    cv_scores = cross_val_score(clf, np.vstack([X_train_s, X_test_s]), np.hstack([y_train, y_test]),
+                                cv=skf, scoring='accuracy')
+
+    print(f"\n=== Random Forest on {name} ===")
+    print("Test accuracy:", acc)
+    print("5-fold CV mean/std:", cv_scores.mean(), cv_scores.std())
+    print("Confusion matrix:\n", cm)
+    print("Classification report:\n", report)
+    if len(np.unique(y)) == 2 and hasattr(clf, "predict_proba"):
+        proba = clf.predict_proba(X_test_s)[:,1]
+        print("ROC AUC:", roc_auc_score(y_test, proba))
+
+# Load datasets
+bc = datasets.load_breast_cancer()
+iris = datasets.load_iris()
+
+evaluate_rf(bc.data, bc.target, name="Breast Cancer")
+evaluate_rf(iris.data, iris.target, name="Iris")
