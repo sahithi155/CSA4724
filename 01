@@ -1,0 +1,61 @@
+import numpy as np
+from sklearn.metrics import confusion_matrix, classification_report
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# ----------------------------
+# PART 1: BI-LEVEL CONFUSION MATRIX (Binary Classification)
+# ----------------------------
+
+# True labels (0 = Negative, 1 = Positive)
+y_true_binary = [0, 1, 1, 0, 1, 0, 1, 0, 1, 1]
+
+# Predicted labels
+y_pred_binary = [0, 1, 0, 0, 1, 0, 1, 1, 1, 0]
+
+# Compute confusion matrix
+cm_binary = confusion_matrix(y_true_binary, y_pred_binary)
+
+print("Bi-Level Confusion Matrix:")
+print(cm_binary)
+
+# Visualize
+plt.figure(figsize=(5,4))
+sns.heatmap(cm_binary, annot=True, cmap='Blues', fmt='d',
+            xticklabels=['Pred 0','Pred 1'],
+            yticklabels=['True 0','True 1'])
+plt.title("Binary Confusion Matrix")
+plt.show()
+
+# Classification report
+print("\nBinary Classification Report:")
+print(classification_report(y_true_binary, y_pred_binary))
+
+
+# ----------------------------
+# PART 2: MULTI-LEVEL CONFUSION MATRIX (Multi-class Classification)
+# ----------------------------
+
+# True labels (Classes: 0, 1, 2)
+y_true_multi = [0, 1, 2, 1, 0, 2, 2, 1, 0, 1]
+
+# Predicted labels
+y_pred_multi = [0, 2, 2, 1, 0, 2, 1, 1, 0, 0]
+
+# Compute confusion matrix
+cm_multi = confusion_matrix(y_true_multi, y_pred_multi)
+
+print("\nMulti-Level Confusion Matrix:")
+print(cm_multi)
+
+# Visualize multi-level confusion matrix
+plt.figure(figsize=(6,5))
+sns.heatmap(cm_multi, annot=True, cmap='Greens', fmt='d',
+            xticklabels=['Pred 0','Pred 1','Pred 2'],
+            yticklabels=['True 0','True 1','True 2'])
+plt.title("Multi-Class Confusion Matrix")
+plt.show()
+
+# Multi-class classification report
+print("\nMulti-Class Classification Report:")
+print(classification_report(y_true_multi, y_pred_multi))
