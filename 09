@@ -1,0 +1,92 @@
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import make_classification
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import Adam
+import pandas as pd
+
+# ---------------------------------------------------------
+# 1. Create a Dataset
+# ---------------------------------------------------------
+X, y = make_classification(
+    n_samples=3000,
+    n_features=10,
+    n_informative=6,
+    n_classes=2,
+    random_state=42
+)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# ---------------------------------------------------------
+# 2. Function to Build Custom MLP Model
+# ---------------------------------------------------------
+def build_mlp(hidden_layers=1, neurons=16, activation='relu', lr=0.01):
+    model = Sequential()
+    
+    # Input + first hidden layer
+    model.add(Dense(neurons, input_dim=X_train.shape[1], activation=activation))
+    
+    # Additional hidden layers
+    for _ in range(hidden_layers - 1):
+        model.add(Dense(neurons, activation=activation))
+    
+    # Output layer
+    model.add(Dense(1, activation='sigmoid'))
+    
+    model.compile(
+        loss='binary_crossentropy',
+        optimizer=Adam(learning_rate=lr),
+        metrics=['accuracy']
+    )
+    return model
+
+# ---------------------------------------------------------
+# 3. Test Multiple Architectures
+# ---------------------------------------------------------
+hidden_layers_list = [1, 2, 3]
+neurons_list = [8, 16, 32]
+activations = ['relu', 'tanh']
+learning_rates = [0.001, 0.01]
+
+results = []
+
+for hl in hidden_layers_list:
+    for neu in neurons_list:
+        for act in activations:
+            for lr in learning_rates:
+
+                print(f"\nTraining: HL={hl}, Neurons={neu}, Act={act}, LR={lr}")
+                
+                model = build_mlp(
+                    hidden_layers=hl,
+                    neurons=neu,
+                    activation=act,
+                    lr=lr
+                )
+
+                history = model.fit(
+                    X_train, y_train,
+                    epochs=20,
+                    batch_size=32,
+                    verbose=0
+                )
+
+                loss, acc = model.evaluate(X_test, y_test, verbose=0)
+
+                results.append([hl, neu, act, lr, acc])
+                print(f"Accuracy = {acc:.4f}")
+
+# ---------------------------------------------------------
+# 4. Create Results Table
+# ---------------------------------------------------------
+df = pd.DataFrame(
+    results,
+    columns=["Hidden Layers", "Neurons", "Activation", "Learning Rate", "Accuracy"]
+)
+
+print("\n\nFINAL PERFORMANCE TABLE:")
+print(df)
