@@ -1,0 +1,66 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ---------------------------
+# 1. Create a synthetic dataset
+# y = 4x + 3 + noise
+# ---------------------------
+np.random.seed(42)
+X = np.random.rand(100)
+y = 4 * X + 3 + np.random.randn(100) * 0.2
+
+# ---------------------------
+# 2. Initialize parameters
+# ---------------------------
+m = 0       # slope
+b = 0       # intercept
+lr = 0.1    # learning rate
+iterations = 100           # number of gradient descent steps
+loss_history = []          # to store MSE each step
+n = len(X)                 # number of samples
+
+# ---------------------------
+# 3. Gradient Descent Algorithm
+# ---------------------------
+for i in range(iterations):
+    y_pred = m * X + b          # prediction
+    error = y_pred - y          # error
+    
+    # compute gradients
+    dm = (2/n) * np.dot(error, X)
+    db = (2/n) * np.sum(error)
+    
+    # update parameters
+    m -= lr * dm
+    b -= lr * db
+    
+    # compute mean squared error
+    mse = np.mean(error**2)
+    loss_history.append(mse)
+
+print("Final Slope (m):", m)
+print("Final Intercept (b):", b)
+
+# ---------------------------
+# 4. Plot Loss Curve
+# ---------------------------
+plt.figure(figsize=(6,4))
+plt.plot(loss_history)
+plt.title("Gradient Descent Loss Curve")
+plt.xlabel("Iterations")
+plt.ylabel("MSE Loss")
+plt.grid(True)
+plt.show()
+
+# ---------------------------
+# 5. Plot Data and Fitted Line
+# ---------------------------
+plt.figure(figsize=(6,4))
+plt.scatter(X, y, label="Data Points")
+plt.plot(X, m * X + b, color='red', label="Fitted Line")
+plt.title("Gradient Descent Result")
+plt.xlabel("X")
+plt.ylabel("y")
+plt.legend()
+plt.grid(True)
+plt.show()
